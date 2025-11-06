@@ -22,9 +22,6 @@ import { successResponse, errorResponse } from "../common/utils/response.util";
 export class VehicleController {
   constructor(private readonly svc: VehicleService) {}
 
-  // ───────────────────────────────────────────────
-  // 🔹 Create a new vehicle
-  // ───────────────────────────────────────────────
   @Post()
   @ApiOperation({ summary: "Add a new vehicle" })
   @ApiResponse({ status: 201, description: "Vehicle created successfully" })
@@ -33,17 +30,13 @@ export class VehicleController {
     try {
       const result = await this.svc.create(dto);
       return successResponse("Vehicle created successfully", result);
-    } catch (err) {
+    } catch (err: any) {
       return errorResponse(
-        err.message || "Unable to create vehicle",
-        err.status || HttpStatus.BAD_REQUEST,
+        "Unable to create vehicle" + (err.message ? `: ${err.message}` : ""),
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-
-  // ───────────────────────────────────────────────
-  // 🔹 Get all vehicles (optional filters)
-  // ───────────────────────────────────────────────
   @Get()
   @ApiOperation({
     summary: "Get all vehicles",
@@ -76,15 +69,12 @@ export class VehicleController {
       return successResponse("Vehicles retrieved successfully", vehicles);
     } catch (err) {
       return errorResponse(
-        err.message || "Unable to retrieve vehicles",
-        err.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        "Unable to retrieve vehicles" + (err.message ? `: ${err.message}` : ""),
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Search vehicles (keyword)
-  // ───────────────────────────────────────────────
   @Get("search")
   @ApiOperation({
     summary: "Search vehicles by keyword",
@@ -103,15 +93,11 @@ export class VehicleController {
       return successResponse("Vehicle search completed successfully", results);
     } catch (err) {
       return errorResponse(
-        err.message || "Error performing search",
-        err.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        "Error performing search" + (err.message ? `: ${err.message}` : ""),
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-
-  // ───────────────────────────────────────────────
-  // 🔹 Get a single vehicle
-  // ───────────────────────────────────────────────
   @Get(":idOrVin")
   @ApiOperation({ summary: "Get a vehicle by ID or VIN" })
   @ApiResponse({ status: 200, description: "Vehicle found" })
@@ -124,15 +110,11 @@ export class VehicleController {
       return successResponse("Vehicle retrieved successfully", vehicle);
     } catch (err) {
       return errorResponse(
-        err.message || "Error retrieving vehicle",
-        err.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        "Error retrieving vehicle" + (err.message ? `: ${err.message}` : ""),
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-
-  // ───────────────────────────────────────────────
-  // 🔹 Update vehicle details
-  // ───────────────────────────────────────────────
   @Put(":idOrVin")
   @ApiOperation({ summary: "Update a vehicle by ID or VIN" })
   @ApiResponse({ status: 200, description: "Vehicle updated successfully" })
@@ -148,15 +130,12 @@ export class VehicleController {
       return successResponse("Vehicle updated successfully", updated);
     } catch (err) {
       return errorResponse(
-        err.message || "Unable to update vehicle",
-        err.status || HttpStatus.BAD_REQUEST,
+        "Unable to update vehicle" + (err.message ? `: ${err.message}` : ""),
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Delete vehicle
-  // ───────────────────────────────────────────────
   @Delete(":idOrVin")
   @HttpCode(200)
   @ApiOperation({ summary: "Delete a vehicle by ID or VIN" })
@@ -170,15 +149,12 @@ export class VehicleController {
       return successResponse("Vehicle deleted successfully");
     } catch (err) {
       return errorResponse(
-        err.message || "Error deleting vehicle",
-        err.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        "Unable to delete vehicle" + (err.message ? `: ${err.message}` : ""),
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Get vehicle valuation via VIN
-  // ───────────────────────────────────────────────
   @Get(":vin/valuation")
   @ApiOperation({
     summary: "Get vehicle valuation",
@@ -199,15 +175,12 @@ export class VehicleController {
       );
     } catch (err) {
       return errorResponse(
-        err.message || "Unable to fetch valuation",
-        err.status || HttpStatus.NOT_FOUND,
+        "Unable to fetch valuation" + (err.message ? `: ${err.message}` : ""),
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Stats endpoint (bonus)
-  // ───────────────────────────────────────────────
   @Get("stats/manufacturers")
   @ApiOperation({
     summary: "Get vehicle count per manufacturer",
@@ -237,8 +210,9 @@ export class VehicleController {
       );
     } catch (err) {
       return errorResponse(
-        err.message || "Unable to fetch manufacturer stats",
-        err.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        "Unable to fetch manufacturer stats" +
+          (err.message ? `: ${err.message}` : ""),
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

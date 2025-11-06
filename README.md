@@ -1,28 +1,31 @@
-# 🚗 Autochek Backend Technical Test
+# Autochek Backend Technical Test
 
-A backend API built with **NestJS**, **TypeORM**, and **SQLite**, implementing **vehicle valuation** and **loan processing** for Autochek’s automotive and financial services.
+A backend API built with **NestJS**, **TypeORM**, and **SQLite**, implementing **vehicle valuation**, **loan processing**, **user management**, and **offers** for Autochek’s automotive and financial services.
 
 This project demonstrates:
-- Vehicle data management (CRUD)
-- Real-time vehicle valuation via RapidAPI (with offline mock fallback)
-- Loan application processing and eligibility calculation
-- Data validation, error handling, and clean API documentation
+- Modular backend architecture with clear domain separation
+- Real-time **VIN-based vehicle valuation** via **RapidAPI (Jack Roe)**
+- Secure and well-documented **loan processing** workflow
+- **User** and **offer** management endpoints
+- Robust error handling, validation, and Swagger documentation
 
----
 
-## ⚙️ Tech Stack
 
-- **Framework:** [NestJS](https://nestjs.com/)
-- **ORM:** [TypeORM](https://typeorm.io/)
-- **Database:** SQLite (in-memory or persistent)
-- **Language:** TypeScript
-- **Documentation:** Swagger (auto-generated)
-- **Security:** Helmet, Rate limiting, Validation pipes
-- **Testing:** Jest (unit tests)
+## Tech Stack
 
----
+| Category | Technology |
+|-----------|-------------|
+| **Framework** | [NestJS](https://nestjs.com/) |
+| **ORM** | [TypeORM](https://typeorm.io/) |
+| **Database** | SQLite (in-memory for testing or persistent) |
+| **Language** | TypeScript |
+| **API Docs** | Swagger |
+| **Security** | Helmet, Rate Limiting, Validation Pipes |
+| **Testing** | Jest |
 
-## 🚀 Getting Started
+
+
+## Getting Started
 
 ### 1. Clone the Repository
 ```bash
@@ -37,17 +40,17 @@ npm install
 
 ### 3. Environment Setup
 Create a `.env` file in the project root:
-```
-# Optional — use mock mode if not provided
+```bash
 RAPIDAPI_KEY=your_rapidapi_key_here
+RAPIDAPI_HOST=vin-lookup-by-jack-roe.p.rapidapi.com
 RAPIDAPI_URL=https://vin-lookup-by-jack-roe.p.rapidapi.com/vehicle
 ```
 
 If no key is set, the app automatically switches to **mock valuation mode**.
 
----
 
-## ▶️ Run the App
+
+## Run the App
 
 ### Development mode
 ```bash
@@ -60,55 +63,55 @@ npm run build
 npm run start:prod
 ```
 
----
 
-## 🌱 Seed the Database
 
-You can seed demo vehicles in two ways:
+## Seed the Database
 
-### Option 1 — Auto-seed on startup
-Runs automatically when the app boots if the DB is empty.
+You can seed demo users, vehicles, and valuations:
 
-### Option 2 — Manual seed
 ```bash
 npm run seed
 ```
 
-This inserts sample vehicles like:
+This inserts sample data such as:
 ```json
-[
-  { "vin": "1HGCM82633A004352", "make": "Honda", "model": "Accord" },
-  { "vin": "3N1AB7AP6HY256789", "make": "Nissan", "model": "Sentra" },
-  { "vin": "WBA3A5G57FNS12345", "make": "BMW", "model": "3 Series" }
-]
+{
+  "users": [{ "name": "John Doe", "email": "john@demo.com" }],
+  "vehicles": [
+    { "vin": "1HGCM82633A004352", "make": "Honda", "model": "Accord" },
+    { "vin": "WBA3A5G57FNS12345", "make": "BMW", "model": "3 Series" }
+  ]
+}
 ```
 
----
 
-## 🧩 API Endpoints
+
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|-----------|-------------|
+| **POST** | `/users` | Create a new user |
+| **GET** | `/users/:id` | Get a specific user |
+| **PATCH** | `/users/:id` | Update user information |
 | **POST** | `/vehicles` | Add a new vehicle |
-| **GET** | `/vehicles` | List all vehicles |
-| **GET** | `/vehicles/:idOrVin` | Get a vehicle by ID or VIN |
-| **PUT** | `/vehicles/:idOrVin` | Update a vehicle |
-| **DELETE** | `/vehicles/:idOrVin` | Delete a vehicle |
-| **POST** | `/valuation` | Estimate vehicle value (via VIN) |
-| **POST** | `/loans` | Submit a loan application |
-| **GET** | `/loans` | Get all loan applications |
-| **GET** | `/loans/:id` | Get a specific loan |
-| **PATCH** | `/loans/:id/status` | Update loan status (approve/reject) |
+| **GET** | `/vehicles` | Get all vehicles |
+| **GET** | `/vehicles/:idOrVin` | Retrieve vehicle by ID or VIN |
+| **POST** | `/valuation` | Get vehicle valuation via VIN |
+| **POST** | `/loans` | Create a loan application |
+| **GET** | `/loans/:id` | Retrieve specific loan |
+| **PATCH** | `/loans/:id/status` | Update loan status |
+| **POST** | `/offers` | Create a loan offer |
+| **GET** | `/offers` | Get all loan offers |
 
----
 
-## 💰 Loan Eligibility Rules
 
-- Maximum loan = **70% of the vehicle value**
-- If `requestedAmount` > `maxLoan`, status = **offered**
-- Otherwise, status = **approved**
+## Loan & Offer Logic
 
-Example:
+- **Max Loan Amount:** 70% of vehicle valuation  
+- If `requestedAmount > maxLoan` → `status = offered`  
+- If `requestedAmount <= maxLoan` → `status = approved`
+
+**Example:**
 ```json
 {
   "requestedAmount": 10000,
@@ -118,91 +121,134 @@ Example:
 }
 ```
 
----
+Offers generated will be tied to the user and vehicle entities.
 
-## 📘 API Documentation (Swagger)
 
-After starting the app, open:
-👉 **[http://localhost:3000/docs](http://localhost:3000/docs)**
 
-You’ll see all endpoints under:
-- Vehicles
-- Valuation
-- Loans
+## VIN Lookup Integration (RapidAPI)
 
-Each endpoint includes:
-- Input schema (DTO)
-- Example requests
-- Example responses
+VIN lookup is powered by [Jack Roe’s VIN Lookup API](https://rapidapi.com/), providing make, model, year, and estimated market value.
 
----
+The integration:
+- Uses **Axios** under the hood
+- Falls back to mock data if API fails or no key is set
+- Automatically enriches valuation data for related vehicles
 
-## 🧪 Running Tests
+Example Response:
+```json
+{
+  "vin": "1HGCM82633A004352",
+  "make": "Honda",
+  "model": "Accord",
+  "year": 2019,
+  "estimatedValue": 10500
+}
+```
+
+
+
+## API Documentation (Swagger)
+
+After running the app, open:
+
+**[http://localhost:3000/docs](http://localhost:3000/docs)**
+
+Each module (Users, Vehicles, Valuations, Loans, Offers) includes:
+- Example requests and responses  
+- DTO validation  
+- Status codes  
+- Error schema  
+- Descriptive endpoint summaries  
+
+
+
+## Project Structure
+
+```
+src/
+ ├── app.module.ts
+ ├── main.ts
+ ├── common/
+ │    ├── filters/
+ │    ├── interceptors/
+ │    └── dto/
+ ├── user/
+ │    ├── dto/
+ │    ├── entities/
+ │    ├── user.controller.ts
+ │    ├── user.service.ts
+ │    └── user.module.ts
+ ├── vehicle/
+ │    ├── dto/
+ │    ├── entities/
+ │    ├── vehicle.controller.ts
+ │    ├── vehicle.service.ts
+ │    └── vehicle.module.ts
+ ├── valuation/
+ │    ├── dto/
+ │    ├── integrations/
+ │    ├── entities/
+ │    ├── valuation.controller.ts
+ │    ├── valuation.service.ts
+ │    └── valuation.module.ts
+ ├── loan/
+ │    ├── dto/
+ │    ├── entities/
+ │    ├── rules/
+ │    ├── loan.controller.ts
+ │    ├── loan.service.ts
+ │    └── loan.module.ts
+ ├── offer/
+ │    ├── dto/
+ │    ├── entities/
+ │    ├── offer.controller.ts
+ │    ├── offer.service.ts
+ │    └── offer.module.ts
+ ├── database/
+ │    ├── seed.ts
+ │    └── index.ts
+ └── config/
+```
+
+
+
+## Security Features
+
+- **Helmet:** Secures HTTP headers  
+- **Rate limiting:** Max 100 requests/min per IP  
+- **Validation:** DTO-based, strict whitelisting  
+- **Error handling:** Global `AllExceptionsFilter`  
+- **Logging:** Integrated with NestJS Logger  
+
+
+
+## Testing
 
 ```bash
 npm run test
 ```
 
-Output example:
+Example output:
 ```
+ PASS  src/user/user.service.spec.ts
  PASS  src/vehicle/vehicle.service.spec.ts
- Test Suites: 1 passed, 1 total
- Tests:       1 passed, 1 total
+ Test Suites: 2 passed, 2 total
+ Tests:       5 passed, 5 total
 ```
 
----
-
-## 🧱 Project Structure
-
-```
-src/
- ├── main.ts
- ├── app.module.ts
- ├── config/
- ├── common/
- │    ├── filters/
- │    ├── interceptors/
- │    └── dto/
- ├── vehicle/
- │    ├── vehicle.controller.ts
- │    ├── vehicle.service.ts
- │    ├── vehicle.module.ts
- │    └── entities/
- ├── valuation/
- │    ├── valuation.controller.ts
- │    ├── valuation.service.ts
- │    ├── integrations/
- │    └── dto/
- ├── loan/
- │    ├── loan.controller.ts
- │    ├── loan.service.ts
- │    ├── loan.module.ts
- │    ├── entities/
- │    └── rules/
- └── database/
-      ├── seed.ts
-      └── index.ts
-```
-
----
-
-## 🔒 Security Measures
-- **Helmet** for HTTP header security  
-- **Rate limiting**: max 100 requests/min  
-- **Global validation**: whitelist, DTO-based  
-- **Centralized error handling** with `AllExceptionsFilter`
-
----
 
 ## Notes for Reviewers
 
-- The app runs “as-is” with `npm install && npm run start:dev`
-- No external dependencies required besides NestJS stack
-- Supports both **mock** and **live API** valuation modes
-- Fully modular, easy to extend with authentication or external storage
+- Runs “as-is” using:  
+  ```bash
+  npm install && npm run start:dev
+  ```
+- No external DB setup required (SQLite in-memory)
+- VIN lookup live via RapidAPI or mock fallback
+- Modular design: can easily extend with Auth or Payments
 
----
 
 ## License
-MIT © Adeyemi Oduyungbo
-# autocheck
+
+MIT © Adeyemi Oduyungbo  
+**Autochek Backend Test**

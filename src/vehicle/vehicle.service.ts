@@ -18,9 +18,6 @@ export class VehicleService {
     private readonly valuationService: ValuationService,
   ) {}
 
-  // ───────────────────────────────────────────────
-  // 🔹 Create new vehicle
-  // ───────────────────────────────────────────────
   async create(dto: CreateVehicleDto) {
     const existing = await this.repo.findOne({ where: { vin: dto.vin } });
     if (existing) {
@@ -33,9 +30,6 @@ export class VehicleService {
     return this.repo.save(v);
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Get all vehicles (with optional filters)
-  // ───────────────────────────────────────────────
   async findAll(filters?: { make?: string; model?: string; year?: string }) {
     const where: any = {};
     if (filters?.make) where.make = ILike(`%${filters.make}%`);
@@ -50,9 +44,6 @@ export class VehicleService {
     return vehicles;
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Search vehicles by keyword
-  // ───────────────────────────────────────────────
   async search(term: string) {
     if (!term || term.trim().length < 2) {
       throw new BadRequestException({
@@ -71,9 +62,6 @@ export class VehicleService {
     });
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Find by ID or VIN
-  // ───────────────────────────────────────────────
   async findByIdOrVin(idOrVin: string) {
     const vehicle =
       idOrVin.length === 36
@@ -84,27 +72,18 @@ export class VehicleService {
     return vehicle;
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Update vehicle
-  // ───────────────────────────────────────────────
   async update(idOrVin: string, dto: UpdateVehicleDto) {
     const vehicle = await this.findByIdOrVin(idOrVin);
     Object.assign(vehicle, dto);
     return this.repo.save(vehicle);
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Remove vehicle
-  // ───────────────────────────────────────────────
   async remove(idOrVin: string) {
     const vehicle = await this.findByIdOrVin(idOrVin);
     await this.repo.remove(vehicle);
     return { success: true };
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Get valuation by VIN (via external API)
-  // ───────────────────────────────────────────────
   async getValuationByVin(vin: string) {
     const vehicle = await this.repo.findOne({ where: { vin } });
     if (!vehicle) throw new NotFoundError("Vehicle", vin);
@@ -120,9 +99,6 @@ export class VehicleService {
     }
   }
 
-  // ───────────────────────────────────────────────
-  // 🔹 Stats: count vehicles per manufacturer
-  // ───────────────────────────────────────────────
   async getManufacturerStats() {
     const qb = this.repo
       .createQueryBuilder("vehicle")

@@ -20,29 +20,18 @@ export function successResponse(message: string, data: any = null) {
 export function errorResponse(
   message: string,
   status: HttpStatus = HttpStatus.BAD_REQUEST,
-  type: "default" | "user" = "default",
 ) {
-  const payload = {
-    status: "error",
-    message,
-    statusCode: status,
-    type,
-    timestamp: new Date().toISOString(),
-  };
+  const payload = { status: "error", message, statusCode: status };
 
   switch (status) {
     case HttpStatus.NOT_FOUND:
       throw new NotFoundException(payload);
-
     case HttpStatus.BAD_REQUEST:
       throw new BadRequestException(payload);
-
     case HttpStatus.UNAUTHORIZED:
       throw new UnauthorizedException(payload);
-
     case HttpStatus.FORBIDDEN:
       throw new ForbiddenException(payload);
-
     default:
       throw new HttpException(payload, status);
   }

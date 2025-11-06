@@ -1,50 +1,65 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "../app.module";
-import { VehicleService } from "../vehicle/vehicle.service";
+import { User } from "../user/entities/user.entity";
+import { Vehicle } from "../vehicle/entities/vehicle.entity";
+import { Loan } from "../loan/entities/loan.entity";
+import { Offer } from "../offer/entities/offer.entity";
+import { Valuation } from "../valuation/entities/valuation.entity";
 
 async function seed() {
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: false,
   });
-  const vehicleSvc = app.get(VehicleService);
+  const userRepo = (await import("typeorm")).getRepository(User);
+  const vehicleRepo = (await import("typeorm")).getRepository(Vehicle);
+  const loanRepo = (await import("typeorm")).getRepository(Loan);
+  const offerRepo = (await import("typeorm")).getRepository(Offer);
+  const valRepo = (await import("typeorm")).getRepository(Valuation);
 
-  const sample = [
-    {
-      vin: "1HGCM82633A004352",
-      make: "Honda",
-      model: "Accord",
-      year: 2018,
-      mileage: 54000,
-    },
-    {
-      vin: "3N1AB7AP6HY256789",
-      make: "Nissan",
-      model: "Sentra",
-      year: 2017,
-      mileage: 72000,
-    },
-    {
-      vin: "WBA3A5G57FNS12345",
-      make: "BMW",
-      model: "3 Series",
-      year: 2015,
-      mileage: 90000,
-    },
-  ];
+  const user = userRepo.create({
+    fullName: "John Doe",
+    email: "john.doe@example.com",
+    phoneNumber: "08012345678",
+  });
+  await userRepo.save(user);
 
-  console.log("Seeding vehicles...");
-  for (const v of sample) {
-    try {
-      await vehicleSvc.create(v as any);
-      console.log("Inserted", v.vin);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.log("Skip", v.vin, err.message);
-      } else {
-        console.log("Skip", v.vin, String(err));
-      }
-    }
-  }
+  const vehicle = vehicleRepo.create({
+    vin: "1HGCM82633A004352",
+    make: "Honda",
+    model: "Accord",
+    year: 2018,
+    mileage: 70000,
+    owner: user,
+  });
+  await vehicleRepo.save(vehicle);
+
+  const val = valRepo.create({
+    vehicle,
+    estimatedValue: 12000,
+    source: "simulated",
+    details: { note: "seed simulated valuation" },
+  });
+  await valRepo.save(val);
+
+  const loan = loanRepo.create({
+    vehicle,
+    vehicleId: vehicle.id,
+    user,
+    userId: user.id,
+    amountRequested: 8000,
+    termMonths: 36,
+    status: "pending",
+  });
+  await loanRepo.save(loan);
+
+  const offer = offerRepo.create({
+    loan,
+    offerAmount: 7500,
+    interestRate: 12.5,
+    tenureMonths: 36,
+    status: "pending",
+  });
+  await offerRepo.save(offer);
 
   await app.close();
   console.log("Seeding complete");

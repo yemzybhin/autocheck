@@ -8,6 +8,7 @@ import {
   Patch,
   Query,
   HttpStatus,
+  NotFoundException,
 } from "@nestjs/common";
 import { LoanService } from "./loan.service";
 import { CreateLoanDto } from "./dto/create-loan.dto";
@@ -124,12 +125,26 @@ export class LoanController {
   async getById(@Param("id") id: string) {
     try {
       const loan = await this.loanService.findOne(id);
+
+      if (!loan) {
+        throw new NotFoundException({
+          status: "error",
+          message: "Loan not found",
+          statusCode: HttpStatus.NOT_FOUND,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
       return successResponse("Loan details retrieved successfully", loan);
-    } catch (err) {
-      return errorResponse(
-        err.message || "Loan not found",
-        err.status || HttpStatus.NOT_FOUND,
-      );
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+
+      throw new NotFoundException({
+        status: "error",
+        message: "Unable to fetch loan: " + (error as Error).message,
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 

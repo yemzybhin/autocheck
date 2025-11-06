@@ -50,7 +50,7 @@ async function seedVehicles(app) {
       for (const v of samples) {
         await svc.create(v);
       }
-      console.log("✅ Vehicle seeding complete");
+      console.log("Vehicle seeding complete");
     }
   } catch (err: any) {
     console.error("Vehicle seeding failed:", err.message || err.toString());

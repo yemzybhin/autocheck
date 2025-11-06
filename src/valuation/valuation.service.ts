@@ -49,14 +49,12 @@ export class ValuationService {
 
   async getValuationHistory(vin: string) {
     try {
-      // You could later persist valuations in DB and fetch real history
       const randomBase = Math.floor(Math.random() * 8000) + 7000;
       const history = [
         { date: "2024-01-10", value: randomBase + 3000 },
         { date: "2024-06-01", value: randomBase + 1500 },
         { date: "2025-01-01", value: randomBase },
       ];
-
       return history;
     } catch (error) {
       return errorResponse(
@@ -68,7 +66,6 @@ export class ValuationService {
 
   async getValuationStats() {
     try {
-      // Mock example data
       const valuations = [
         { vin: "1HGCM82633A004352", estimatedValue: 12000 },
         { vin: "3N1AB7AP6HY256789", estimatedValue: 8000 },

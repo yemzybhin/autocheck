@@ -6,6 +6,8 @@ import { ormConfig } from "./config/orm.config";
 import { VehicleModule } from "./vehicle/vehicle.module";
 import { LoanModule } from "./loan/loan.module";
 import { ValuationModule } from "./valuation/valuation.module";
+import { UserModule } from "./user/user.module";
+import { OfferModule } from "./offer/offer.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { RequestLoggerMiddleware } from "./middleware/request-logger.middleware";
@@ -17,6 +19,8 @@ import { RequestLoggerMiddleware } from "./middleware/request-logger.middleware"
     VehicleModule,
     LoanModule,
     ValuationModule,
+    UserModule,
+    OfferModule,
   ],
   controllers: [AppController],
   providers: [AppService],

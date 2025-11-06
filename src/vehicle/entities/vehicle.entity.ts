@@ -6,7 +6,11 @@ import {
   UpdateDateColumn,
   Index,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
+import { Valuation } from "../../valuation/entities/valuation.entity";
+import { User } from "../../user/entities/user.entity";
 
 @Entity({ name: "vehicles" })
 export class Vehicle {
@@ -14,7 +18,7 @@ export class Vehicle {
   id: string;
 
   @Index({ unique: true })
-  @Column()
+  @Column({ nullable: true })
   vin: string;
 
   @Column()
@@ -29,10 +33,16 @@ export class Vehicle {
   @Column("int", { default: 0 })
   mileage: number;
 
+  @ManyToOne(() => User, (u) => u.vehicles, { eager: true, nullable: true })
+  @JoinColumn({ name: "owner_id" })
+  owner: User;
+
+  @OneToMany(() => Valuation, (v) => v.vehicle)
+  valuations: Valuation[];
+
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
-
 }

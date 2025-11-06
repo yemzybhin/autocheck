@@ -17,15 +17,14 @@ export class LoanService {
     private readonly vehicleRepo: Repository<Vehicle>,
     private readonly valuationService: ValuationService,
   ) {}
-
-  /** Submit a new loan request */
+  
   async submitLoan(dto: CreateLoanDto) {
     const vehicle = await this.vehicleRepo.findOne({
       where: { id: dto.vehicleId },
     });
+
     if (!vehicle) throw new NotFoundException("Vehicle not found");
 
-    // fetch valuation for this vehicle
     const valuation = await this.valuationService.getValuation({
       vin: vehicle.vin,
     });
@@ -63,7 +62,6 @@ export class LoanService {
     });
   }
 
-  /** Get all loans for a specific applicant */
   async findByApplicant(email: string) {
     const loans = await this.loanRepo.find({
       where: { applicantEmail: email },
@@ -77,7 +75,6 @@ export class LoanService {
     return loans;
   }
 
-  /** Get a single loan by ID */
   async findOne(id: string) {
     const loan = await this.loanRepo.findOne({
       where: { id },
@@ -87,14 +84,12 @@ export class LoanService {
     return loan;
   }
 
-  /** Update the status of an existing loan */
   async updateStatus(id: string, dto: UpdateLoanStatusDto) {
     const loan = await this.findOne(id);
     loan.status = dto.status;
     return this.loanRepo.save(loan);
   }
 
-  /** Fetch a complete loan summary (loan + vehicle + valuation) */
   async getLoanSummary(id: string) {
     const loan = await this.findOne(id);
     if (!loan) throw new NotFoundException("Loan not found");
@@ -107,7 +102,7 @@ export class LoanService {
       loanId: loan.id,
       applicantName: loan.applicantName,
       status: loan.status,
-      requestedAmount: loan.requestedAmount,
+      amountRequested: loan.amountRequested,
       approvedAmount: loan.approvedAmount,
       vehicle: {
         vin: loan.vehicle.vin,
